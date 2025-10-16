@@ -9,7 +9,18 @@ st.title('Product Sales and Profit Analysis')
 excel_file_path = 'Ordenes Final.xlsx' # Update this path as needed
 
 try:
-    df_excel = pd.read_excel(excel_file_path, parse_dates=['Order Date', 'Ship Date'])
+    df_excel = pd.read_excel(excel_file_path)
+
+    # Convert date columns to string and extract the number of days
+    df_excel['Order Date'] = df_excel['Order Date'].astype(str).str.extract('(\d+) days').astype(int)
+    df_excel['Ship Date'] = df_excel['Ship Date'].astype(str).str.extract('(\d+) days').astype(int)
+
+    # Define a base date (Excel's epoch is typically 1899-12-30)
+    base_date = pd.to_datetime('1899-12-30')
+
+    # Convert the number of days to datetime objects
+    df_excel['Order Date'] = base_date + pd.to_timedelta(df_excel['Order Date'], unit='days')
+    df_excel['Ship Date'] = base_date + pd.to_timedelta(df_excel['Ship Date'], unit='days')
 
     # Add filters to the sidebar
     st.sidebar.header("Filter by Region and State")
