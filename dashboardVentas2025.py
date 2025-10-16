@@ -30,3 +30,9 @@ try:
     fig_profit = px.bar(top_n_profitable_products, x='Product Name', y='Profit', title='Top 5 Most Profitable Products')
     fig_profit.update_layout(xaxis_tickangle=-45)
     st.plotly_chart(fig_profit)
+
+
+except FileNotFoundError:
+    st.error(f"Error: The file was not found at the path: {excel_file_path}")
+except Exception as e:
+    st.error(f"An error occurred while reading the Excel file: {e}")
