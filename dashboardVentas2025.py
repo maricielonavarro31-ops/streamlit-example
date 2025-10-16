@@ -41,6 +41,14 @@ try:
     else:
         filtered_df = filtered_df_region[filtered_df_region['State'] == selected_state]
 
+    # Add a checkbox to show/hide the filtered data
+    show_data = st.checkbox('Show Filtered Data')
+
+    # Display the filtered data if the checkbox is checked
+    if show_data:
+        st.subheader('Filtered Data')
+        st.dataframe(filtered_df)
+
 
     # Process data for top selling products
     product_sales = filtered_df.groupby('Product Name')['Sales'].sum().reset_index()
