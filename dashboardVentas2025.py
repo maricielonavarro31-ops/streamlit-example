@@ -18,7 +18,14 @@ try:
 
     # Create bar chart for top selling products using Plotly Express and Streamlit
     fig_sales = px.bar(top_n_products, x='Product Name', y='Sales', title='Top 5 Selling Products')
-    fig_sales.update_layout(xaxis_tickangle=-45)
+    fig_sales.update_layout(
+        xaxis_tickangle=-45,
+        xaxis=dict(
+            tickmode="array",
+            ticktext=[text.replace(' ', '<br>') for text in top_n_products['Product Name']],
+            tickvals=top_n_products['Product Name']
+        )
+    )
     st.plotly_chart(fig_sales)
 
     # Process data for top profitable products
@@ -28,9 +35,15 @@ try:
 
     # Create bar chart for top profitable products using Plotly Express and Streamlit
     fig_profit = px.bar(top_n_profitable_products, x='Product Name', y='Profit', title='Top 5 Most Profitable Products')
-    fig_profit.update_layout(xaxis_tickangle=-45)
+    fig_profit.update_layout(
+        xaxis_tickangle=-45,
+        xaxis=dict(
+            tickmode="array",
+            ticktext=[text.replace(' ', '<br>') for text in top_n_profitable_products['Product Name']],
+            tickvals=top_n_profitable_products['Product Name']
+        )
+    )
     st.plotly_chart(fig_profit)
-
 
 except FileNotFoundError:
     st.error(f"Error: The file was not found at the path: {excel_file_path}")
