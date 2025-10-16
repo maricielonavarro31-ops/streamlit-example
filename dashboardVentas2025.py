@@ -41,8 +41,8 @@ try:
     else:
         filtered_df = filtered_df_region[filtered_df_region['State'] == selected_state]
 
-    # Add a checkbox to show/hide the filtered data
-    show_data = st.checkbox('Show Filtered Data')
+    # Add a checkbox to show/hide the filtered data in the sidebar
+    show_data = st.sidebar.checkbox('Show Filtered Data')
 
     # Display the filtered data if the checkbox is checked
     if show_data:
