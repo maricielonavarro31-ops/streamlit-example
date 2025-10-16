@@ -9,7 +9,7 @@ st.title('Product Sales and Profit Analysis')
 excel_file_path = 'Ordenes Final.xlsx' # Update this path as needed
 
 try:
-    df_excel = pd.read_excel(excel_file_path)
+    df_excel = pd.read_excel(excel_file_path, parse_dates=['Order Date', 'Ship Date'])
 
     # Add filters to the sidebar
     st.sidebar.header("Filter by Region and State")
