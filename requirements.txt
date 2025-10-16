@@ -1,5 +1,5 @@
 altair
 pandas
 streamlit
-ploty
+plotly
 openpyxl
