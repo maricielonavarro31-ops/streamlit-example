@@ -14,9 +14,12 @@ try:
     # Add filters to the sidebar
     st.sidebar.header("Filter by Region and State")
 
+    # Use columns for side-by-side filters
+    col1, col2 = st.sidebar.columns(2)
+
     # Region filter
     regions = ['Todas'] + df_excel['Region'].unique().tolist()
-    selected_region = st.sidebar.selectbox('Select a Region', regions)
+    selected_region = col1.selectbox('Select a Region', regions)
 
     # Filter data by region
     if selected_region == 'Todas':
@@ -30,7 +33,7 @@ try:
     else:
         states = ['Todos'] + filtered_df_region['State'].unique().tolist()
 
-    selected_state = st.sidebar.selectbox('Select a State', states)
+    selected_state = col2.selectbox('Select a State', states)
 
     # Filter data by state
     if selected_state == 'Todos':
