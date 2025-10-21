@@ -6,7 +6,7 @@ st.title('Product Sales and Profit Analysis')
 
 # Replace 'ruta/a/tu/archivo.xlsx' with the actual path to your file
 # When running in Streamlit, the file should be accessible from the environment
-excel_file_path = '/content/drive/MyDrive/Herramientas Datos/Ordenes Final.xlsx' # Update this path as needed
+excel_file_path = 'Ordenes Final.xls' # Update this path as needed
 
 try:
     df_excel = pd.read_excel(excel_file_path)
