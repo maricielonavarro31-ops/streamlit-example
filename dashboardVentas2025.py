@@ -12,8 +12,17 @@ try:
     df_excel = pd.read_excel(excel_file_path)
 
     # Convert 'Order Date' to datetime objects, coercing errors
-    df_excel['Order Date'] = pd.to_datetime(df_excel['Order Date'], errors='coerce')
-    df_excel.dropna(subset=['Order Date'], inplace=True) # Remove rows with invalid dates
+  
+    # Convert date columns to string and extract the number of days
+    df_excel['Order Date'] = df_excel['Order Date'].astype(str).str.extract('(\d+) days').astype(int)
+    df_excel['Ship Date'] = df_excel['Ship Date'].astype(str).str.extract('(\d+) days').astype(int)
+
+    # Define a base date (Excel's epoch is typically 1899-12-30)
+    base_date = pd.to_datetime('1899-12-30')
+
+    # Convert the number of days to datetime objects
+    df_excel['Order Date'] = base_date + pd.to_timedelta(df_excel['Order Date'], unit='days')
+    df_excel['Ship Date'] = base_date + pd.to_timedelta(df_excel['Ship Date'], unit='days')
 
 
     # Add filters to the sidebar
