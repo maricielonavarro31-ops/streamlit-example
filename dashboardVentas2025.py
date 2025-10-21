@@ -6,20 +6,14 @@ st.title('Product Sales and Profit Analysis')
 
 # Replace 'ruta/a/tu/archivo.xlsx' with the actual path to your file
 # When running in Streamlit, the file should be accessible from the environment
-excel_file_path = 'Ordenes Final.xls' # Update this path as needed
+excel_file_path = '/content/drive/MyDrive/Herramientas Datos/Ordenes Final.xlsx' # Update this path as needed
 
 try:
     df_excel = pd.read_excel(excel_file_path)
 
-    # Convert date columns to datetime objects if they are not already
-    # Assuming 'Order Date' and 'Ship Date' might be in Excel's numeric date format
-    # or a string format that needs conversion.
-    # If they are already datetime objects, these lines won't change them.
-    try:
-        df_excel['Order Date'] = pd.to_datetime(df_excel['Order Date'], errors='coerce')
-        df_excel['Ship Date'] = pd.to_datetime(df_excel['Ship Date'], errors='coerce')
-    except Exception as e:
-        st.warning(f"Could not convert date columns to datetime. Please check the format. Error: {e}")
+    # Convert 'Order Date' to datetime objects, coercing errors
+    df_excel['Order Date'] = pd.to_datetime(df_excel['Order Date'], errors='coerce')
+    df_excel.dropna(subset=['Order Date'], inplace=True) # Remove rows with invalid dates
 
 
     # Add filters to the sidebar
@@ -54,8 +48,8 @@ try:
 
     # Date Range Filter
     st.sidebar.subheader("Filter by Order Date Range")
-    min_date = pd.to_datetime(filtered_df_state['Order Date']).min() if not filtered_df_state['Order Date'].empty else pd.to_datetime('2015-01-01')
-    max_date = pd.to_datetime(filtered_df_state['Order Date']).max() if not filtered_df_state['Order Date'].empty else pd.to_datetime('2020-12-31')
+    min_date = filtered_df_state['Order Date'].min() if not filtered_df_state.empty else pd.to_datetime('2015-01-01')
+    max_date = filtered_df_state['Order Date'].max() if not filtered_df_state.empty else pd.to_datetime('2020-12-31')
 
     start_date = st.sidebar.date_input('Start Date', min_value=min_date, max_value=max_date, value=min_date)
     end_date = st.sidebar.date_input('End Date', min_value=min_date, max_value=max_date, value=max_date)
@@ -67,7 +61,6 @@ try:
     # Filter data by date range
     filtered_df = filtered_df_state[(filtered_df_state['Order Date'] >= start_date) & (filtered_df_state['Order Date'] <= end_date)].copy()
 
-
     # Add a checkbox to show/hide the filtered data in the sidebar
     show_data = st.sidebar.checkbox('Show Filtered Data')
 
@@ -75,7 +68,6 @@ try:
     if show_data:
         st.subheader('Filtered Data')
         st.dataframe(filtered_df)
-
 
     # Process data for top selling products
     product_sales = filtered_df.groupby('Product Name')['Sales'].sum().reset_index()
@@ -110,6 +102,7 @@ try:
         )
     )
     st.plotly_chart(fig_profit)
+
 
 except FileNotFoundError:
     st.error(f"Error: The file was not found at the path: {excel_file_path}")
