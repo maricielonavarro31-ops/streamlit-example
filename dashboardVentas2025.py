@@ -6,24 +6,24 @@ st.title('Product Sales and Profit Analysis')
 
 # Replace 'ruta/a/tu/archivo.xlsx' with the actual path to your file
 # When running in Streamlit, the file should be accessible from the environment
-excel_file_path = 'Ordenes Final.xlsx' # Update this path as needed
+excel_file_path = '/content/drive/MyDrive/Herramientas Datos/Ordenes Final.xlsx' # Update this path as needed
 
 try:
     df_excel = pd.read_excel(excel_file_path)
 
-    # Convert date columns to string and extract the number of days
-    df_excel['Order Date'] = df_excel['Order Date'].astype(str).str.extract('(\d+) days').astype(int)
-    df_excel['Ship Date'] = df_excel['Ship Date'].astype(str).str.extract('(\d+) days').astype(int)
+    # Convert date columns to datetime objects if they are not already
+    # Assuming 'Order Date' and 'Ship Date' might be in Excel's numeric date format
+    # or a string format that needs conversion.
+    # If they are already datetime objects, these lines won't change them.
+    try:
+        df_excel['Order Date'] = pd.to_datetime(df_excel['Order Date'], errors='coerce')
+        df_excel['Ship Date'] = pd.to_datetime(df_excel['Ship Date'], errors='coerce')
+    except Exception as e:
+        st.warning(f"Could not convert date columns to datetime. Please check the format. Error: {e}")
 
-    # Define a base date (Excel's epoch is typically 1899-12-30)
-    base_date = pd.to_datetime('1899-12-30')
-
-    # Convert the number of days to datetime objects
-    df_excel['Order Date'] = base_date + pd.to_timedelta(df_excel['Order Date'], unit='days')
-    df_excel['Ship Date'] = base_date + pd.to_timedelta(df_excel['Ship Date'], unit='days')
 
     # Add filters to the sidebar
-    st.sidebar.header("Filter by Region and State")
+    st.sidebar.header("Filter Options")
 
     # Use columns for side-by-side filters
     col1, col2 = st.sidebar.columns(2)
@@ -48,9 +48,25 @@ try:
 
     # Filter data by state
     if selected_state == 'Todos':
-        filtered_df = filtered_df_region
+        filtered_df_state = filtered_df_region
     else:
-        filtered_df = filtered_df_region[filtered_df_region['State'] == selected_state]
+        filtered_df_state = filtered_df_region[filtered_df_region['State'] == selected_state]
+
+    # Date Range Filter
+    st.sidebar.subheader("Filter by Order Date Range")
+    min_date = pd.to_datetime(filtered_df_state['Order Date']).min() if not filtered_df_state['Order Date'].empty else pd.to_datetime('2015-01-01')
+    max_date = pd.to_datetime(filtered_df_state['Order Date']).max() if not filtered_df_state['Order Date'].empty else pd.to_datetime('2020-12-31')
+
+    start_date = st.sidebar.date_input('Start Date', min_value=min_date, max_value=max_date, value=min_date)
+    end_date = st.sidebar.date_input('End Date', min_value=min_date, max_value=max_date, value=max_date)
+
+    # Convert date_input to datetime objects for comparison
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+
+    # Filter data by date range
+    filtered_df = filtered_df_state[(filtered_df_state['Order Date'] >= start_date) & (filtered_df_state['Order Date'] <= end_date)].copy()
+
 
     # Add a checkbox to show/hide the filtered data in the sidebar
     show_data = st.sidebar.checkbox('Show Filtered Data')
@@ -67,7 +83,7 @@ try:
     top_n_products = product_sales.head(5)
 
     # Create bar chart for top selling products using Plotly Express and Streamlit
-    fig_sales = px.bar(top_n_products, x='Product Name', y='Sales', title=f'Top 5 Selling Products in {selected_state}, {selected_region}')
+    fig_sales = px.bar(top_n_products, x='Product Name', y='Sales', title=f'Top 5 Selling Products in {selected_state}, {selected_region} ({start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")})')
     fig_sales.update_layout(
         xaxis_tickangle=-45,
         xaxis=dict(
@@ -84,7 +100,7 @@ try:
     top_n_profitable_products = product_profit.head(5)
 
     # Create bar chart for top profitable products using Plotly Express and Streamlit
-    fig_profit = px.bar(top_n_profitable_products, x='Product Name', y='Profit', title=f'Top 5 Most Profitable Products in {selected_state}, {selected_region}')
+    fig_profit = px.bar(top_n_profitable_products, x='Product Name', y='Profit', title=f'Top 5 Most Profitable Products in {selected_state}, {selected_region} ({start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")})')
     fig_profit.update_layout(
         xaxis_tickangle=-45,
         xaxis=dict(
