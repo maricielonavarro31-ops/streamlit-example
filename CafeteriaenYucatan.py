@@ -1,138 +1,124 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import pydeck as pdk
 
-# Load the modified Excel file
+# Define the file path (re-load for self-contained script)
 file_path = 'Coffee Shop Sales_Modified.xlsx'
+
+# Load the Excel file into a pandas DataFrame
 try:
     df = pd.read_excel(file_path)
 except FileNotFoundError:
     st.error(f"Error: The file '{file_path}' was not found. Please ensure it's in the correct location.")
     st.stop()
 
-st.title("Coffee Shop Sales Dashboard")
+st.title("Coffee Shop Location Dashboard")
 
-# Ensure 'store_name' column exists as per previous steps (if not already renamed in the loaded file)
+# Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
     df.rename(columns={'store_location': 'store_name'}, inplace=True)
 
-# Extract unique product details and store names for filter options
-unique_products = df['product_detail'].unique().tolist()
-unique_stores = df['store_name'].unique().tolist()
+# Create a dictionary for state store location to lat/lon mapping
+# Approximate coordinates for the specified locations in Yucatán, Mexico
+location_coordinates = {
+    'MOTUL': {'lat': 21.1667, 'lon': -89.2667},
+    'TICUL': {'lat': 20.5833, 'lon': -89.5333},
+    'MERIDA': {'lat': 20.9670, 'lon': -89.6247}
+}
+
+# Add 'latitude' and 'longitude' columns to the DataFrame
+if 'state store location' in df.columns:
+    # Ensure state store location column values are clean and in line with dictionary keys
+    df['state store location'] = df['state store location'].str.upper().str.strip()
+    df['latitude'] = df['state store location'].map(lambda x: location_coordinates.get(x, {}).get('lat'))
+    df['longitude'] = df['state store location'].map(lambda x: location_coordinates.get(x, {}).get('lon'))
+else:
+    st.warning("Column 'state store location' not found. Cannot map store locations.")
+    df['latitude'] = None
+    df['longitude'] = None
+
+# Drop rows where latitude or longitude could not be determined
+df.dropna(subset=['latitude', 'longitude'], inplace=True)
+
+# Extract unique store names for filter options
+unique_store_names = df['store_name'].unique().tolist() if 'store_name' in df.columns else []
+
+# Extract unique product types for filter options
+unique_product_types = df['product_type'].unique().tolist() if 'product_type' in df.columns else []
 
 st.sidebar.header("Filter Data")
 
-# Create Streamlit multiselect widgets for 'product_detail' and 'store_name'
-selected_products = st.sidebar.multiselect(
-    'Select Products:',
-    options=unique_products,
-    default=unique_products
+# Create a Streamlit multiselect widget in the sidebar for 'store_name'
+selected_store_names = st.sidebar.multiselect(
+    'Select Stores:',
+    options=unique_store_names,
+    default=unique_store_names
 )
 
-selected_stores = st.sidebar.multiselect(
-    'Select Stores:',
-    options=unique_stores,
-    default=unique_stores
+# Create a Streamlit multiselect widget in the sidebar for 'product_type'
+selected_product_types = st.sidebar.multiselect(
+    'Select Product Types:',
+    options=unique_product_types,
+    default=unique_product_types
 )
 
 # Apply filters to the DataFrame
-if selected_products and selected_stores:
-    filtered_df = df[
-        df['product_detail'].isin(selected_products) &
-        df['store_name'].isin(selected_stores)
-    ]
-else:
-    filtered_df = pd.DataFrame() # Empty DataFrame if no filters selected
+filtered_df = df[
+    df['store_name'].isin(selected_store_names) &
+    df['product_type'].isin(selected_product_types)
+]
 
-# Aggregate the filtered data to find the most sold products
-top_products_filtered = filtered_df.groupby('product_detail')['transaction_qty'].sum().nlargest(10).reset_index()
-top_products_filtered.rename(columns={'transaction_qty': 'total_quantity_sold'}, inplace=True)
+st.subheader("Store Locations on Map")
 
-st.header("Cafetería en Yucatán")
-st.subheader("Somos una cadena de cafeterías ubicada en Yucatán que cuenta con 3 sucursales")
-st.markdown("La primera sucursal que abrimos se llama Lower Manhattan, la cual está ubicada en Motul")
-st.markdown("La segunda sucursal que abrimos se llama Hell's Kitchen, la cual está ubicada en Mérida")
-st.markdown("La última que abrimos es Astoria, la cual está ubicada en Ticul")
+if not filtered_df.empty:
+    # Aggregate data to get unique store locations and their details (if needed for tooltip)
+    # For simplicity, we'll just plot distinct store locations available in the filtered_df
+    store_locations_for_map = filtered_df[['store_name', 'state store location', 'latitude', 'longitude']].drop_duplicates()
 
-if not top_products_filtered.empty:
-    # Create the bar chart using Plotly Express
-    fig = px.bar(
-        top_products_filtered,
-        x='product_detail',
-        y='total_quantity_sold',
-        title='Top 10 Productos más vendidos',
-        labels={'product_detail': 'Product', 'total_quantity_sold': 'Total Quantity Sold'}
+    # Set the initial view state for the map, centered around the average coordinates
+    view_state = pdk.ViewState(
+        latitude=store_locations_for_map['latitude'].mean(),
+        longitude=store_locations_for_map['longitude'].mean(),
+        zoom=9,
+        pitch=45
     )
-    fig.update_layout(xaxis_title_standoff=25)
-    fig.update_xaxes(tickangle=45)
-    st.plotly_chart(fig, width='stretch') # Changed use_container_width=True to width='stretch'
+
+    # Create a PyDeck Layer for the Scatterplot
+    layer = pdk.Layer(
+        'ScatterplotLayer',
+        store_locations_for_map,
+        get_position='[longitude, latitude]',
+        get_color='[200, 30, 0, 160]',
+        get_radius=500,  # Radius in meters
+        pickable=True,
+        tooltip={
+            "text": "Store: {store_name}\nLocation: {state store location}\nLat: {latitude}\nLon: {longitude}"
+        }
+    )
+
+    # Create a Deck object
+    r = pdk.Deck(
+        map_style='mapbox://styles/mapbox/light-v9',
+        initial_view_state=view_state,
+        layers=[layer],
+        tooltip={
+            "html": "<b>Store:</b> {store_name}<br/><b>Location:</b> {state store location}"
+        }
+    )
+
+    # Render the map
+    st.pydeck_chart(r)
 else:
-    st.warning("No data available for the selected filters to display a chart.")
+    st.warning("No store locations to display based on current filters.")
 
+st.subheader("Filtered Data Table")
+if not filtered_df.empty:
+    st.dataframe(filtered_df)
+else:
+    st.warning("No data available for the selected filters.")
 
-import json 
-import pandas as pd
-import pydeck as pdk
-import streamlit  as st
-
-import pydeck as pdk
-
-municipios_yucatan = "Yucatan.geojson"
-with open(municipios_yucatan) as archivo:
-    municipios_json = json.load(archivo)
-dfMunicipios = pd.read_csv("municipiosDatos.csv")
-dfMunicipios.drop('Unnamed: 0',axis=1,inplace=True)
-st.dataframe(dfMunicipios)
-
-# Create a copy of the GeoJSON data to modify it
-enriched_municipios_json = json.loads(json.dumps(municipios_json))
-
-# Merge RandomNumbers from dfMunicipios into the GeoJSON properties
-for feature in enriched_municipios_json['features']:
-    municipio_name = feature['properties']['NOMGEO']
-    # Find the corresponding row in dfMunicipios
-    matching_row = dfMunicipios[dfMunicipios['Municipio'] == municipio_name]
-    if not matching_row.empty:
-        # Convert numpy.int64 to a standard Python int
-        random_number = int(matching_row['RandomNumbers'].iloc[0])
-        feature['properties']['RandomNumbers'] = random_number
-    else:
-        feature['properties']['RandomNumbers'] = 0 # Default value if no match found
-# Define the pydeck GeoJsonLayer
-geojson_layer = pdk.Layer(
-    "GeoJsonLayer",
-    enriched_municipios_json,
-    filled=True,
-    get_fill_color=[
-        "(properties.RandomNumbers / 1000) * 255", # Red component (scaled by value)
-        "(properties.RandomNumbers / 1000) * 255", # Green component
-        "255 - (properties.RandomNumbers / 1000) * 255", # Blue component (inverse scaled)
-        200 # Alpha transparency
-    ],
-    get_line_color=[0, 0, 0, 200],
-    get_line_width=1,
-    stroked=True,
-    opacity=0.8,
-    extruded=False,
-    auto_highlight=True,
-    pickable=True # Make polygons pickable for interactivity
-)
-
-# Set the initial view state for Yucatan
-view_state = pdk.ViewState(
-    latitude=20.8,
-    longitude=-89.0,
-    zoom=7,
-    pitch=0
-)
-
-# Create the pydeck Deck
-r = pdk.Deck(
-    layers=[geojson_layer],
-    initial_view_state=view_state,
-    tooltip={"text": "Municipio: {NOMGEO}\nRandomNumbers: {RandomNumbers}"}
-)
-
-# Render the deck
-
-st.pydeck_chart(r)
+st.subheader("How to run this Streamlit app:")
+st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
+st.markdown("2. Open your terminal or command prompt.")
+st.markdown("3. Navigate to the directory where you saved `app.py`.")
+st.markdown("4. Run the command: `streamlit run app.py`")
