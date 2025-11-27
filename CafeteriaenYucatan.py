@@ -48,7 +48,11 @@ else:
 top_products_filtered = filtered_df.groupby('product_detail')['transaction_qty'].sum().nlargest(10).reset_index()
 top_products_filtered.rename(columns={'transaction_qty': 'total_quantity_sold'}, inplace=True)
 
-st.header("Top 10 Most Sold Products (Filtered)")
+st.header("Cafetería en Yucatán")
+st.subheader("Somos una cafetería ubicada en Yucatán que cuenta con 3 sucursales")
+st.markdown("La primera sucursal que abrimos se llama Lower Manhattan, la cual está ubicada en Motul")
+st.markdown("La segunda sucursal que abrimos se llama Hell's Kitchen, la cual está ubicada en Mérida")
+st.markdown("La última que abrimos es Astoria, la cual está ubicada en Ticul")
 
 if not top_products_filtered.empty:
     # Create the bar chart using Plotly Express
@@ -56,7 +60,7 @@ if not top_products_filtered.empty:
         top_products_filtered,
         x='product_detail',
         y='total_quantity_sold',
-        title='Top 10 Most Sold Products by Quantity',
+        title='Top 10 Productos más vendidos',
         labels={'product_detail': 'Product', 'total_quantity_sold': 'Total Quantity Sold'}
     )
     fig.update_layout(xaxis_title_standoff=25)
