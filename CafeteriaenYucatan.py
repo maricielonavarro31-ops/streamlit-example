@@ -69,11 +69,6 @@ if not top_products_filtered.empty:
 else:
     st.warning("No data available for the selected filters to display a chart.")
 
-st.subheader("How to run this Streamlit app:")
-st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
-st.markdown("2. Open your terminal or command prompt.")
-st.markdown("3. Navigate to the directory where you saved `app.py`.")
-st.markdown("4. Run the command: `streamlit run app.py`")
 
 import json 
 import pandas as pd
