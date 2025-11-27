@@ -111,11 +111,6 @@ if not filtered_df.empty:
 else:
     st.warning("No store locations to display based on current filters.")
     
-# Create the pydeck Deck
-r = pdk.Deck(
-    layers=[geojson_layer],
-    initial_view_state=view_state,
-   
 st.subheader("Filtered Data Table")
 if not filtered_df.empty:
     st.dataframe(filtered_df)
