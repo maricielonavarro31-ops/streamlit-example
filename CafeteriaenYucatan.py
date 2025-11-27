@@ -49,7 +49,7 @@ top_products_filtered = filtered_df.groupby('product_detail')['transaction_qty']
 top_products_filtered.rename(columns={'transaction_qty': 'total_quantity_sold'}, inplace=True)
 
 st.header("Cafetería en Yucatán")
-st.subheader("Somos una cafetería ubicada en Yucatán que cuenta con 3 sucursales")
+st.subheader("Somos una cadena de cafeterías ubicada en Yucatán que cuenta con 3 sucursales")
 st.markdown("La primera sucursal que abrimos se llama Lower Manhattan, la cual está ubicada en Motul")
 st.markdown("La segunda sucursal que abrimos se llama Hell's Kitchen, la cual está ubicada en Mérida")
 st.markdown("La última que abrimos es Astoria, la cual está ubicada en Ticul")
