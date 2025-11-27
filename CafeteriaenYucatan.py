@@ -4,7 +4,7 @@ import pydeck as pdk
 import json
 
 # Load the modified Excel file
-file_path = '/content/drive/MyDrive/Herramientas Datos/Coffee Shop Sales_Modified.xlsx'
+file_path = 'Coffee Shop Sales_Modified.xlsx'
 try:
     df = pd.read_excel(file_path)
 except FileNotFoundError:
