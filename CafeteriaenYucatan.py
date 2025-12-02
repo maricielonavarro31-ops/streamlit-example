@@ -280,7 +280,7 @@ with st.container():
     st.title("¡Gracias por tu visita!")
     st.write("Esperamos que nos regreses muy pronto!!")
 
-st.image("https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/Good%20Morning%20Cat%20Sticker%20by%20Raf%20Sinopoli.gif?raw=true")
+    st.image("https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/Good%20Morning%20Cat%20Sticker%20by%20Raf%20Sinopoli.gif?raw=true")
 
     st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
     # URLs for the sticker images
