@@ -179,6 +179,77 @@ if not filtered_df.empty:
 else:
     st.warning("No data available for the selected filters.")
 
+# Custom CSS for the Streamlit app
+# We apply the body background directly to the Streamlit main container (.stApp)
+# And create classes for the content box and stickers
+custom_css = """
+<style>
+    /* Apply beige background to the entire Streamlit app */
+    .stApp {
+        background-color: #F5F5DC; /* Código hexadecimal para beige */
+        font-family: Arial, sans-serif;
+        color: #333;
+    }
+    /* Style for the content box */
+    .content-box {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-top: 50px; /* Adjust as needed for vertical spacing */
+        margin-bottom: 50px;
+        max-width: 600px; /* Limit width for better presentation */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /* Style for the sticker container */
+    .sticker-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    /* Style for individual stickers */
+    .sticker {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 50%; /* Para darle forma de sticker redondo */
+        border: 3px solid #f0e68c; /* Borde beige claro */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+</style>
+"""
+
+# Inject custom CSS into the Streamlit app
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# Main content box using a Streamlit container and custom HTML div
+with st.container():
+    st.markdown('<div class="content-box">', unsafe_allow_html=True)
+    st.title("¡Bienvenido a mi aplicación!")
+    st.write("Este es un ejemplo de contenido con fondo beige.")
+
+    st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
+    # URLs for the sticker images
+    coffee_sticker_1 = "https://images.unsplash.com/photo-1542990669-7d07945037d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM0OTg&ixlib=rb-4.0.3&q=80&w=400"
+    dessert_sticker_1 = "https://images.unsplash.com/photo-1558296316-c737c35f928e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDE&ixlib=rb-4.0.3&q=80&w=400"
+    coffee_sticker_2 = "https://images.unsplash.com/photo-1509042239860-f550ce7103fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDQ&ixlib=rb-4.0.3&q=80&w=400"
+    dessert_sticker_2 = "https://images.unsplash.com/photo-1533602187313-2d574d6c413b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDY&ixlib=rb-4.0.3&q=80&w=400"
+
+    # Embed images with the 'sticker' class using st.markdown
+    st.markdown(f'''
+    <img src="{coffee_sticker_1}" alt="Coffee Sticker" class="sticker">
+    <img src="{dessert_sticker_1}" alt="Dessert Sticker" class="sticker">
+    <img src="{coffee_sticker_2}" alt="Another Coffee Sticker" class="sticker">
+    <img src="{dessert_sticker_2}" alt="Another Dessert Sticker" class="sticker">
+    ''', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True) # Close sticker-container div
+    st.markdown('</div>', unsafe_allow_html=True) # Close content-box div
+
 st.subheader("How to run this Streamlit app:")
 st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
 st.markdown("2. Open your terminal or command prompt.")
