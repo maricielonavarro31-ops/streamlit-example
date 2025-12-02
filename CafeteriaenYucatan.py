@@ -165,7 +165,7 @@ if not filtered_df.empty:
         initial_view_state=view_state,
         layers=layers_to_render,
         tooltip={
-             "text": "Store: {store_name}\nLocation: {state store location}"}
+             "text": "Store: {store_name}\nLocation: {state store location}"
             #"html": "<b>Store:</b> {store_name}<br/><b>Location:</b> {state store location}"
         }
     )
