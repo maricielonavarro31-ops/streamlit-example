@@ -12,7 +12,7 @@ except FileNotFoundError:
     st.error(f"Error: The file '{file_path}' was not found. Please ensure it's in the correct location.")
     st.stop()
 
-st.title("Cafeterías ubicadas en Yucatán")
+st.title("Cafeterías ubicadas en Yucatán ☕")
 
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
@@ -226,12 +226,6 @@ if not filtered_df.empty:
 else:
     st.warning("No hay datos de afluencia para mostrar con los filtros seleccionados.")
 
-
-st.subheader("How to run this Streamlit app:")
-st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
-st.markdown("2. Open your terminal or command prompt.")
-st.markdown("3. Navigate to the directory where you saved `app.py`.")
-st.markdown("4. Run the command: `streamlit run app.py`")
 
 # Custom CSS for the Streamlit app
 # We apply the body background directly to the Streamlit main container (.stApp)
