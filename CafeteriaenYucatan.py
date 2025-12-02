@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import json
-
+import plotly.express as px
 
 # Load the modified Excel file
 file_path = 'Coffee Shop Sales_Modified.xlsx'
@@ -181,6 +181,58 @@ if not filtered_df.empty:
 else:
     st.warning("No data available for the selected filters.")
 
+# --- New Chart: Most Sold Products ---
+st.subheader("Productos más vendidos (filtrado):")
+if not filtered_df.empty:
+    top_products_filtered = filtered_df.groupby('product_detail')['transaction_qty'].sum().nlargest(10).reset_index()
+    top_products_filtered.rename(columns={'transaction_qty': 'total_quantity_sold'}, inplace=True)
+
+    fig_products = px.bar(
+        top_products_filtered,
+        x='product_detail',
+        y='total_quantity_sold',
+        title='Top 10 Productos más vendidos por cantidad',
+        labels={'product_detail': 'Producto', 'total_quantity_sold': 'Cantidad Total Vendida'}
+    )
+    fig_products.update_layout(xaxis_title_standoff=25)
+    fig_products.update_xaxes(tickangle=45)
+    st.plotly_chart(fig_products, width='stretch')
+else:
+    st.warning("No hay datos de productos para mostrar con los filtros seleccionados.")
+
+# --- New Chart: Hourly Traffic ---
+st.subheader("Afluencia por horas (filtrado):")
+if not filtered_df.empty:
+    # Ensure 'transaction_time' is in datetime format to extract hour
+    df['transaction_time'] = pd.to_datetime(df['transaction_time'], format='%H:%M:%S').dt.time # Convert to just time objects for consistency if it's mixed with dates
+    
+    # Extract hour from transaction_time, handle if it's already a time object
+    # Need to re-process filtered_df to ensure 'hour' column is available
+    filtered_df_with_hour = filtered_df.copy()
+    filtered_df_with_hour['hour'] = pd.to_datetime(filtered_df_with_hour['transaction_time'], format='%H:%M:%S').dt.hour
+
+    hourly_traffic = filtered_df_with_hour.groupby('hour')['transaction_id'].count().reset_index()
+    hourly_traffic.rename(columns={'transaction_id': 'number_of_transactions'}, inplace=True)
+
+    fig_hourly = px.line(
+        hourly_traffic,
+        x='hour',
+        y='number_of_transactions',
+        title='Número de Transacciones por Hora',
+        labels={'hour': 'Hora del Día', 'number_of_transactions': 'Número de Transacciones'}
+    )
+    fig_hourly.update_layout(xaxis = dict(tickmode = 'linear', dtick = 1))
+    st.plotly_chart(fig_hourly, width='stretch')
+else:
+    st.warning("No hay datos de afluencia para mostrar con los filtros seleccionados.")
+
+
+st.subheader("How to run this Streamlit app:")
+st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
+st.markdown("2. Open your terminal or command prompt.")
+st.markdown("3. Navigate to the directory where you saved `app.py`.")
+st.markdown("4. Run the command: `streamlit run app.py`")
+
 # Custom CSS for the Streamlit app
 # We apply the body background directly to the Streamlit main container (.stApp)
 # And create classes for the content box and stickers
@@ -251,5 +303,3 @@ with st.container():
 
     st.markdown('</div>', unsafe_allow_html=True) # Close sticker-container div
     st.markdown('</div>', unsafe_allow_html=True) # Close content-box div
-
-
