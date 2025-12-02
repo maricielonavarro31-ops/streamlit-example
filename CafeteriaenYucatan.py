@@ -235,7 +235,7 @@ with st.container():
 
     st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
     # URLs for the sticker images
-    coffee_sticker_1 = "cafe-shop-building-estilo-plano_156780-12.jpg"
+    coffee_sticker_1 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/9a3600dd37ff19065a5ee3916ca944020fe1d49d/cafe-shop-building-estilo-plano_156780-12.jpg"
     dessert_sticker_1 = "https://images.unsplash.com/photo-1558296316-c737c35f928e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDE&ixlib=rb-4.0.3&q=80&w=400"
     coffee_sticker_2 = "https://images.unsplash.com/photo-1509042239860-f550ce7103fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDQ&ixlib=rb-4.0.3&q=80&w=400"
     dessert_sticker_2 = "https://images.unsplash.com/photo-1533602187313-2d574d6c413b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDY&ixlib=rb-4.0.3&q=80&w=400"
