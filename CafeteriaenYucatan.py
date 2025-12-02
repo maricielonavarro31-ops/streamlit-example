@@ -14,8 +14,6 @@ except FileNotFoundError:
 
 st.title("Cafeterías ubicadas en Yucatán ☕")
 
-st.image("https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/Good%20Morning%20Cat%20Sticker%20by%20Raf%20Sinopoli.gif?raw=true")
-
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
     df.rename(columns={'store_location': 'store_name'}, inplace=True)
@@ -280,7 +278,9 @@ st.markdown(custom_css, unsafe_allow_html=True)
 with st.container():
     st.markdown('<div class="content-box">', unsafe_allow_html=True)
     st.title("¡Gracias por tu visita!")
-    st.write("Esperamos que nos visites muy pronto!!")
+    st.write("Esperamos que nos regreses muy pronto!!")
+
+st.image("https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/Good%20Morning%20Cat%20Sticker%20by%20Raf%20Sinopoli.gif?raw=true")
 
     st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
     # URLs for the sticker images
