@@ -11,7 +11,7 @@ except FileNotFoundError:
     st.error(f"Error: The file '{file_path}' was not found. Please ensure it's in the correct location.")
     st.stop()
 
-st.title("Cafetería ubicada en Yucatán")
+st.title("Cafeterías ubicadas en Yucatán")
 
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
