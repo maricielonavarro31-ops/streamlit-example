@@ -11,7 +11,7 @@ except FileNotFoundError:
     st.error(f"Error: The file '{file_path}' was not found. Please ensure it's in the correct location.")
     st.stop()
 
-st.title("Cofatería ubicada en Yucatán")
+st.title("Cafetería ubicada en Yucatán")
 
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
@@ -114,7 +114,7 @@ filtered_df = df[
     df['product_type'].isin(selected_product_types)
 ]
 
-st.subheader("Store Locations on Map")
+st.subheader("Ubicación de las sucursales:")
 
 if not filtered_df.empty:
     # Aggregate data to get unique store locations and their details
@@ -173,7 +173,7 @@ if not filtered_df.empty:
 else:
     st.warning("No store locations to display based on current filters.")
 
-st.subheader("Filtered Data Table")
+st.subheader("Información de ventas:")
 if not filtered_df.empty:
     st.dataframe(filtered_df)
 else:
@@ -229,8 +229,8 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # Main content box using a Streamlit container and custom HTML div
 with st.container():
     st.markdown('<div class="content-box">', unsafe_allow_html=True)
-    st.title("¡Bienvenido a mi aplicación!")
-    st.write("Este es un ejemplo de contenido con fondo beige.")
+    st.title("¡Gracias por tu visita!")
+    st.write("Esperamos que nos visites muy pronto!!")
 
     st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
     # URLs for the sticker images
@@ -250,8 +250,4 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True) # Close sticker-container div
     st.markdown('</div>', unsafe_allow_html=True) # Close content-box div
 
-st.subheader("How to run this Streamlit app:")
-st.markdown("1. Save the code above as a Python file (e.g., `app.py`).")
-st.markdown("2. Open your terminal or command prompt.")
-st.markdown("3. Navigate to the directory where you saved `app.py`.")
-st.markdown("4. Run the command: `streamlit run app.py`")
+
