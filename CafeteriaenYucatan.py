@@ -14,6 +14,8 @@ except FileNotFoundError:
 
 st.title("Cafeterías ubicadas en Yucatán ☕")
 
+st.image(https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/Good%20Morning%20Cat%20Sticker%20by%20Raf%20Sinopoli.gif?raw=true)
+
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
     df.rename(columns={'store_location': 'store_name'}, inplace=True)
