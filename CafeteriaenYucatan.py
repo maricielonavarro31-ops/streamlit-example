@@ -3,8 +3,6 @@ import pandas as pd
 import pydeck as pdk
 import json
 
-st.image(file_path = 'cafeteria-abierta-individuo-mesa_23-2148548903.png', caption="Esta es una imagen local", use_column_width=True)
-
 # Load the modified Excel file
 file_path = 'Coffee Shop Sales_Modified.xlsx'
 try:
