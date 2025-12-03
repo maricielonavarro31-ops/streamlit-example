@@ -14,24 +14,6 @@ except FileNotFoundError:
 
 st.title("Cafeterías ubicadas en Yucatán ☕")
 
- 
-    # URLs for the sticker images
-    coffee_sticker_1 = "https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/WhatsApp%20Image%202025-12-02%20at%201.03.53%20AM%20(1).jpeg?raw=true"
-    dessert_sticker_1 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/refs/heads/master/Frappe.jpeg"
-    coffee_sticker_2 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/refs/heads/master/Granos%20cafe.jpeg"
-    dessert_sticker_2 = "https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/coffee-shop-icon-png.webp?raw=true"
-
-    # Embed images with the 'sticker' class using st.markdown
-    st.markdown(f'''
-    <img src="{coffee_sticker_1}" alt="Coffee Sticker" class="sticker">
-    <img src="{dessert_sticker_1}" alt="Dessert Sticker" class="sticker">
-    <img src="{coffee_sticker_2}" alt="Another Coffee Sticker" class="sticker">
-    <img src="{dessert_sticker_2}" alt="Another Dessert Sticker" class="sticker">
-    ''', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True) # Close sticker-container div
-    st.markdown('</div>', unsafe_allow_html=True) # Close content-box div
-
 # Ensure 'store_name' column exists and 'state store location' was added
 if 'store_location' in df.columns and 'store_name' not in df.columns:
     df.rename(columns={'store_location': 'store_name'}, inplace=True)
