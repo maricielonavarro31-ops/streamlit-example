@@ -3,7 +3,6 @@ import pandas as pd
 import pydeck as pdk
 import json
 import plotly.express as px
-from shapely.geometry import shape, Point
 
 # Load the modified Excel file
 file_path = 'Coffee Shop Sales_Modified.xlsx'
