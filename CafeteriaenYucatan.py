@@ -14,7 +14,7 @@ except FileNotFoundError:
 
 st.title("Cafeterías ubicadas en Yucatán ☕")
 
-    st.markdown('<div class="sticker-container">', unsafe_allow_html=True)
+ st.markdown('<div class="sticker-container">'
     # URLs for the sticker images
     coffee_sticker_1 = "https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/WhatsApp%20Image%202025-12-02%20at%201.03.53%20AM%20(1).jpeg?raw=true"
     dessert_sticker_1 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/refs/heads/master/Frappe.jpeg"
