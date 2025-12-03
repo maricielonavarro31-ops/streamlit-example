@@ -287,7 +287,7 @@ with st.container():
     coffee_sticker_1 = "https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/WhatsApp%20Image%202025-12-02%20at%201.03.53%20AM%20(1).jpeg?raw=true"
     dessert_sticker_1 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/refs/heads/master/Frappe.jpeg"
     coffee_sticker_2 = "https://raw.githubusercontent.com/maricielonavarro31-ops/streamlit-example/refs/heads/master/Granos%20cafe.jpeg"
-    dessert_sticker_2 = "https://images.unsplash.com/photo-1533602187313-2d574d6c413b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjVjNTN8MHwxfGFsbHx8fHx8fHwxfDE2NzYwNDM1MDY&ixlib=rb-4.0.3&q=80&w=400"
+    dessert_sticker_2 = "https://github.com/maricielonavarro31-ops/streamlit-example/blob/master/coffee-shop-icon-png.webp?raw=true"
 
     # Embed images with the 'sticker' class using st.markdown
     st.markdown(f'''
