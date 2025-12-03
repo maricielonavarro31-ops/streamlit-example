@@ -37,8 +37,7 @@ else:
     df['latitude'] = None
     df['longitude'] = None
 
-# Drop rows where latitude or longitude could not be determined for stores
-# This ensures only valid store locations are processed
+# Drop rows where latitude or longitude could not be determined
 df.dropna(subset=['latitude', 'longitude'], inplace=True)
 
 # Load GeoJSON for municipalities (assuming Yucatan.geojson is in the root directory)
@@ -46,8 +45,6 @@ df.dropna(subset=['latitude', 'longitude'], inplace=True)
 municipios_yucatan_path = 'Yucatan.geojson'
 municipios_datos_path = 'municipiosDatos.csv'
 
-geoj_layer = None
-municipalities_with_coords_df = pd.DataFrame()
 try:
     with open(municipios_yucatan_path) as archivo:
         municipios_json = json.load(archivo)
@@ -57,20 +54,6 @@ try:
     # Create a copy of the GeoJSON data to modify it
     enriched_municipios_json = json.loads(json.dumps(municipios_json))
 
-    # Prepare a DataFrame of all municipalities with their centroids
-    municipality_data = []
-    for feature in municipios_json['features']:
-        geom = shape(feature['geometry'])
-        centroid = geom.centroid
-        municipality_name = feature['properties']['NOMGEO']
-        municipality_data.append({
-            'NOMGEO': municipality_name,
-            'latitude': centroid.y,
-            'longitude': centroid.x,
-            'state_store_location': municipality_name # Use for mapping
-        })
-    municipality_centroids_df = pd.DataFrame(municipality_data)
-    
     # Merge RandomNumbers from dfMunicipios into the GeoJSON properties
     for feature in enriched_municipios_json['features']:
         municipio_name = feature['properties']['NOMGEO']
@@ -81,7 +64,7 @@ try:
         else:
             feature['properties']['RandomNumbers'] = 0  # Default value if no match found
 
-    geoj_layer = pdk.Layer(
+    geojson_layer = pdk.Layer(
         "GeoJsonLayer",
         enriched_municipios_json,
         filled=True,
@@ -101,6 +84,8 @@ try:
     )
 except FileNotFoundError:
     st.warning("GeoJSON or municipiosDatos.csv files not found. The base map will not be displayed.")
+    geojson_layer = None
+
 
 # Extract unique store names for filter options
 unique_store_names = df['store_name'].unique().tolist() if 'store_name' in df.columns else []
@@ -132,129 +117,61 @@ filtered_df = df[
 
 st.subheader("Ubicación de las sucursales:")
 
-# Prepare data for map: combine all municipalities with existing store locations
 if not filtered_df.empty:
-    # Get unique store locations from the filtered data
-    active_store_locations = filtered_df[['store_name', 'state store location', 'latitude', 'longitude']].drop_duplicates()
+    # Aggregate data to get unique store locations and their details
+    store_locations_for_map = filtered_df[['store_name', 'state store location', 'latitude', 'longitude']].drop_duplicates()
 
-    # Identify municipalities that have active stores
-    active_municipalities = active_store_locations['state store location'].unique()
-
-    # Prepare a DataFrame of all municipalities with their centroids for display
-    # Ensure 'NOMGEO' is the common column for merging, or use municipality_centroids_df directly.
-    # For this, we'll use municipality_centroids_df as a base.
-
-    # Mark all municipalities as "Sin tienda" by default
-    all_municipalities_map_data = municipality_centroids_df.copy()
-    all_municipalities_map_data['store_display_name'] = all_municipalities_map_data['NOMGEO'] + " (Sin tienda)"
-
-    # Update display name for municipalities with stores
-    for index, row in active_store_locations.iterrows():
-        municipio = row['state store location']
-        store_name = row['store_name']
-        # Find the corresponding municipality in the all_municipalities_map_data
-        match_index = all_municipalities_map_data[all_municipalities_map_data['NOMGEO'] == municipio].index
-        if not match_index.empty:
-            all_municipalities_map_data.loc[match_index, 'store_display_name'] = store_name
-            # We could also use the actual store's lat/lon if we want to show the exact store location
-            # For now, we'll stick to municipality centroid for "Sin tienda" and store location for actual stores.
-
-    # Combine store locations and \"Sin tienda\" municipalities
-    # Create a unified DataFrame for plotting both stores and non-store municipalities
-    # Use active_store_locations for actual stores, and then add 'Sin tienda' for others.
-    # To avoid duplicates and ensure correct display, it's better to plot unique store points
-    # and then municipality centroids for those without stores.
-
-    # Create a DataFrame for municipality centers that DON'T have a selected store
-    municipalities_without_selected_stores = municipality_centroids_df[~municipality_centroids_df['state_store_location'].isin(active_municipalities)].copy()
-    municipalities_without_selected_stores['store_name'] = municipalities_without_selected_stores['NOMGEO'] + " (Sin tienda)"
-    municipalities_without_selected_stores['tooltip_text'] = municipalities_without_selected_stores['NOMGEO'] + " (Sin tienda)"
-
-    # Prepare active store locations with tooltip text
-    active_store_locations['tooltip_text'] = active_store_locations['store_name'] + " (en " + active_store_locations['state store location'] + ")"
-
-    # Combine the two for plotting points
-    # For plotting, we need a common set of columns, so let's adjust for store name being 'Sin tienda' if no store.
-    # We'll plot all municipality centroids, and if a store is present, its name will be used.
-    
-    # Use the municipality_centroids_df as the base for the map points.
-    # For each entry, check if there's a store in that municipality in the filtered_df.
-    # If yes, use the store_name and its actual lat/lon. If no, use 'Sin tienda' and the centroid lat/lon.
-    
-    # Create a DataFrame for all points to display on the map
-    all_map_points = []
-    for idx, muni_row in municipality_centroids_df.iterrows():
-        muni_name = muni_row['NOMGEO']
-        matching_stores = active_store_locations[active_store_locations['state store location'] == muni_name]
-        
-        if not matching_stores.empty:
-            # If there are stores in this municipality, add each store's info
-            for s_idx, store_row in matching_stores.iterrows():
-                all_map_points.append({
-                    'display_name': store_row['store_name'],
-                    'location_name': store_row['state store location'],
-                    'latitude': store_row['latitude'],
-                    'longitude': store_row['longitude'],
-                    'is_store': True
-                })
-        else:
-            # If no stores in this municipality, add a 'Sin tienda' point at the centroid
-            all_map_points.append({
-                'display_name': muni_name + " (Sin tienda)",
-                'location_name': muni_name,
-                'latitude': muni_row['latitude'],
-                'longitude': muni_row['longitude'],
-                'is_store': False
-            })
-
-    all_map_points_df = pd.DataFrame(all_map_points)
-    
-    if not all_map_points_df.empty:
-        # Set the initial view state for the map, centered around the mean coordinates of all map points
-        initial_latitude = all_map_points_df['latitude'].mean()
-        initial_longitude = all_map_points_df['longitude'].mean()
-        initial_zoom = 7 # Adjusted zoom to see more of Yucatan
-
-        view_state = pdk.ViewState(
-            latitude=initial_latitude,
-            longitude=initial_longitude,
-            zoom=initial_zoom,
-            pitch=45
-        )
-
-        # Create a PyDeck Layer for the Scatterplot
-        scatterplot_layer = pdk.Layer(
-            'ScatterplotLayer',
-            all_map_points_df,
-            get_position='[longitude, latitude]',
-            get_color='[200, 30, 0, 200]' if 'is_store' else '[0, 100, 200, 150]', # Different color for stores vs. 'Sin tienda'
-            get_radius=500,  # Radius in meters
-            pickable=True,
-            tooltip={
-                "text": "{display_name}\nUbicación: {location_name}"
-            }
-        )
-
-        # Combine layers
-        layers_to_render = []
-        if geoj_layer:
-            layers_to_render.append(geoj_layer)
-        layers_to_render.append(scatterplot_layer)
-
-        # Create a Deck object
-        r = pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=view_state,
-            layers=layers_to_render,
-            tooltip={
-                 "html": "<b>{display_name}</b><br/>Ubicación: {location_name}"
-            }
-        )
-
-        # Render the map
-        st.pydeck_chart(r)
+    # Set the initial view state for the map, centered around the mean coordinates of all stores,
+    # or a default view for Yucatan if no stores are selected.
+    if not store_locations_for_map.empty:
+        initial_latitude = store_locations_for_map['latitude'].mean()
+        initial_longitude = store_locations_for_map['longitude'].mean()
+        initial_zoom = 9 # Adjust zoom level as needed
     else:
-        st.warning("No locations to display on the map based on current filters and data.")
+        # Default view for Yucatan if no stores are selected or filtered
+        initial_latitude = 20.8
+        initial_longitude = -89.0
+        initial_zoom = 7
+
+    view_state = pdk.ViewState(
+        latitude=initial_latitude,
+        longitude=initial_longitude,
+        zoom=initial_zoom,
+        pitch=45
+    )
+
+    # Create a PyDeck Layer for the Scatterplot
+    scatterplot_layer = pdk.Layer(
+        'ScatterplotLayer',
+        store_locations_for_map,
+        get_position='[longitude, latitude]',
+        get_color='[200, 30, 0, 160]',
+        get_radius=500,  # Radius in meters
+        pickable=True,
+        tooltip={
+            "text": "Store: {store_name}\nLocation: {state store location}\nLat: {latitude}\nLon: {longitude}"
+        }
+    )
+
+    # Combine layers
+    layers_to_render = []
+    if geojson_layer:
+        layers_to_render.append(geojson_layer)
+    layers_to_render.append(scatterplot_layer)
+
+    # Create a Deck object
+    r = pdk.Deck(
+        map_style='mapbox://styles/mapbox/light-v9',
+        initial_view_state=view_state,
+        layers=layers_to_render,
+        tooltip={
+             "text": "Store: {store_name}\nLocation: {state store location}"
+            #"html": "<b>Store:</b> {store_name}<br/><b>Location:</b> {state store location}"
+        }
+    )
+
+    # Render the map
+    st.pydeck_chart(r)
 else:
     st.warning("No store locations to display based on current filters.")
 
@@ -287,39 +204,27 @@ else:
 st.subheader("Afluencia por horas (filtrado):")
 if not filtered_df.empty:
     # Ensure 'transaction_time' is in datetime format to extract hour
-    # df['transaction_time'] = pd.to_datetime(df['transaction_time'], format='%H:%M:%S').dt.time # This line might cause issues if 'transaction_time' is not always in HH:MM:SS format without a date
-
-    # It's safer to ensure the original df column is datetime if it's meant to be.
-    # For this, let's assume 'transaction_time' can be directly converted to datetime
-    # and then extract the hour.
-    if not pd.api.types.is_datetime64_any_dtype(df['transaction_time']):
-        try:
-            df['transaction_time'] = pd.to_datetime(df['transaction_time'])
-        except Exception as e:
-            st.warning(f"Could not convert 'transaction_time' to datetime: {e}. Skipping hourly traffic chart.")
-            filtered_df_with_hour = pd.DataFrame() # Create empty to skip chart
+    df['transaction_time'] = pd.to_datetime(df['transaction_time'], format='%H:%M:%S').dt.time # Convert to just time objects for consistency if it's mixed with dates
     
-    if not filtered_df.empty and 'transaction_time' in filtered_df.columns:
-        filtered_df_with_hour = filtered_df.copy()
-        filtered_df_with_hour['hour'] = filtered_df_with_hour['transaction_time'].dt.hour
+    # Extract hour from transaction_time, handle if it's already a time object
+    # Need to re-process filtered_df to ensure 'hour' column is available
+    filtered_df_with_hour = filtered_df.copy()
+    filtered_df_with_hour['hour'] = pd.to_datetime(filtered_df_with_hour['transaction_time'], format='%H:%M:%S').dt.hour
 
-        hourly_traffic = filtered_df_with_hour.groupby('hour')['transaction_id'].count().reset_index()
-        hourly_traffic.rename(columns={'transaction_id': 'number_of_transactions'}, inplace=True)
+    hourly_traffic = filtered_df_with_hour.groupby('hour')['transaction_id'].count().reset_index()
+    hourly_traffic.rename(columns={'transaction_id': 'number_of_transactions'}, inplace=True)
 
-        fig_hourly = px.line(
-            hourly_traffic,
-            x='hour',
-            y='number_of_transactions',
-            title='Número de Transacciones por Hora',
-            labels={'hour': 'Hora del Día', 'number_of_transactions': 'Número de Transacciones'}
-        )
-        fig_hourly.update_layout(xaxis = dict(tickmode = 'linear', dtick = 1))
-        st.plotly_chart(fig_hourly, width='stretch')
-    else:
-        st.warning("No hay datos de afluencia para mostrar con los filtros seleccionados.")
+    fig_hourly = px.line(
+        hourly_traffic,
+        x='hour',
+        y='number_of_transactions',
+        title='Número de Transacciones por Hora',
+        labels={'hour': 'Hora del Día', 'number_of_transactions': 'Número de Transacciones'}
+    )
+    fig_hourly.update_layout(xaxis = dict(tickmode = 'linear', dtick = 1))
+    st.plotly_chart(fig_hourly, width='stretch')
 else:
     st.warning("No hay datos de afluencia para mostrar con los filtros seleccionados.")
-
 
 
 # Custom CSS for the Streamlit app
