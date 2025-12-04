@@ -3,7 +3,7 @@ import pandas as pd
 import pydeck as pdk
 
 # Define the file path (re-load for self-contained script)
-file_path = 'Coffee Shop Sales_Modified.xlsx'
+file_path = '/content/drive/MyDrive/Herramientas Datos/Coffee Shop Sales_Modified.xlsx'
 
 # Load the Excel file into a pandas DataFrame
 try:
