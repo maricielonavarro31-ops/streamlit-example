@@ -4,6 +4,7 @@ import pydeck as pdk
 import json
 import plotly.express as px
 
+st.write("Probando")
 # Load the modified Excel file
 file_path = 'Coffee Shop Sales_Modified.xlsx'
 try:
