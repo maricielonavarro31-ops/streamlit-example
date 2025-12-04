@@ -6,7 +6,7 @@ import plotly.express as px
 
 st.write("Probando")
 # Load the modified Excel file
-file_path = 'Coffee Shop Sales_Modified.xlsx'
+file_path = 'CoffeeShopSales_Modified.xlsx'
 try:
     df = pd.read_excel(file_path)
 except FileNotFoundError:
