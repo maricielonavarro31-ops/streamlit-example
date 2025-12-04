@@ -8,7 +8,7 @@ st.write("Probando")
 # Load the modified Excel file
 file_path = 'CoffeeShopSales_Modified.xlsx'
 try:
-    df = pd.read_excel(file_path)
+    df = pd.read_excel(file_path,engine='openpyxl')
 except FileNotFoundError:
     st.error(f"Error: The file '{file_path}' was not found. Please ensure it's in the correct location.")
     st.stop()
